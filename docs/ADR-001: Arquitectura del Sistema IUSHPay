@@ -1,0 +1,121 @@
+
+Seleccion de estilo arquitectonico para el backend de IUSHPay
+
+---
+
+| Campo | Detalle |
+|---|---|
+| Identificador | ADR-001 |
+| Titulo | Arquitectura del Sistema IUSHPay |
+| Estado | Aprobado |
+| Fecha | Abril 2025 |
+| Autores | Equipo de Arquitectura |
+| Sistema | IUSHPay — Institucion Universitaria Salazar y Herrera |
+
+---
+
+## 1. Contexto
+
+La Institucion Universitaria Salazar y Herrera requiere una plataforma digital denominada IUSHPay que integre el control de acceso al parqueadero con un sistema de pagos institucional. Actualmente el proceso es manual: los estudiantes y visitantes pagan en efectivo o mediante metodos no integrados con el sistema de porteria, lo que genera filas, inconsistencias en saldos, recargas erroneas en cedulas o carnets y ausencia de trazabilidad.
+
+La solucion debe permitir pagos mediante wallet institucional y PSE, validacion de acceso por QR, gestion de tarifas automatica y auditoria de movimientos. El sistema sera consumido por una aplicacion movil o web para estudiantes y visitantes, y por un panel de porteria para el personal operativo.
+
+---
+
+## 2. Problema a Resolver
+
+| # | Problema | Impacto |
+|---|---|---|
+| 1 | Pagos que no se reflejan en tiempo real | El personal de porteria no puede verificar si el pago fue realizado, generando conflictos y retrasos. |
+| 2 | Inconsistencias en saldos y recargas erroneas | Carga de saldo a documentos incorrectos, perdida de dinero y desconfianza del usuario. |
+| 3 | Falta de trazabilidad de transacciones | Imposibilidad de auditar operaciones pasadas o generar reportes confiables para la administracion. |
+| 4 | Procesos manuales en porteria | Filas, lentitud en la atencion y alta dependencia del criterio del operario. |
+| 5 | Riesgo de fraude por uso de cedula | Suplantacion de identidad al usar documentos fisicos como metodo de acceso. |
+
+---
+
+## 3. Decision
+
+Se adopta una arquitectura de Monolito Modular para el backend de IUSHPay. El sistema se despliega como una unica aplicacion, pero su codigo interno esta organizado en modulos con fronteras claras y responsabilidades bien definidas. Cada modulo expone sus funcionalidades unicamente a traves de interfaces internas, evitando el acoplamiento directo entre modulos.
+
+Los modulos principales del sistema son los siguientes:
+
+| Modulo | Responsabilidad | Tecnologia principal |
+|---|---|---|
+| Autenticacion y usuarios | Registro, login, gestion de roles (estudiante, visitante, portero, admin). | ASP.NET Core Identity + JWT |
+| Wallet institucional | Gestion de saldo, recargas y consulta de movimientos por usuario. | EF Core + SQL Server |
+| Pagos y PSE | Integracion con pasarela de pago, procesamiento y confirmacion de transacciones. | HTTP Client + Webhooks |
+| Control de acceso y QR | Generacion y validacion de codigos QR para ingreso y salida del parqueadero. | QRCoder + EF Core |
+| Tarifas | Definicion y calculo automatico de tarifas por tipo de vehiculo y tiempo. | Servicio de dominio interno |
+| Auditoria y trazabilidad | Registro inmutable de todas las transacciones y eventos del sistema. | EF Core + logs estructurados |
+| Notificaciones | Envio de alertas al usuario sobre movimientos, accesos y estado del pago. | Servicio asincrono |
+
+---
+
+## 4. Alternativas Consideradas y Descartadas
+
+| Criterio | Monolito Modular (elegido) | Microservicios | Monolito tradicional |
+|---|---|---|---|
+| Complejidad inicial | Baja — moderada | Alta | Baja |
+| Escalabilidad | Modular | Por servicio | Limitada |
+| Despliegue | Un artefacto | Orquestacion | Un artefacto |
+| Mantenibilidad | Alta con modulos | Alta si madura | Baja con el tiempo |
+| Curva de aprendizaje | Baja | Alta | Muy baja |
+| Adecuacion al proyecto | Alta | Excesiva | Insuficiente |
+| Costo operativo | Bajo | Alto | Bajo |
+
+### 4.1 Por que se descarto la arquitectura de Microservicios
+
+Aunque los microservicios ofrecen escalabilidad granular, su implementacion en una etapa inicial implica una sobrecarga operativa significativa: se requiere orquestacion de contenedores, comunicacion entre servicios, gestion distribuida de transacciones y mayor infraestructura de monitoreo. Para un equipo de desarrollo academico con plazos definidos y un sistema en fase de construccion, esta complejidad no esta justificada. La arquitectura seleccionada permite una migracion progresiva hacia microservicios en el futuro si la demanda del sistema lo requiere.
+
+### 4.2 Por que se descarto el Monolito Tradicional
+
+Un monolito sin estructura modular genera acoplamiento progresivo entre componentes. A medida que el sistema incorpora nuevas funcionalidades como la integracion con PSE o el modulo de reportes, la ausencia de fronteras claras dificulta el mantenimiento, las pruebas y la incorporacion de nuevos desarrolladores. Esta arquitectura fue descartada porque no satisface el atributo de mantenibilidad requerido a mediano plazo.
+
+---
+
+## 5. Justificacion de la Decision
+
+- El sistema puede desplegarse como una sola unidad, simplificando el proceso de integracion continua y despliegue (CI/CD).
+- Los modulos tienen fronteras definidas, lo que permite que equipos distintos trabajen en paralelo sobre modulos diferentes sin generar conflictos de dependencia.
+- La arquitectura es coherente con los atributos de calidad priorizados: seguridad, rendimiento, fiabilidad e interoperabilidad.
+- Permite una evolucion gradual: si un modulo crece en complejidad o demanda de recursos, puede extraerse como servicio independiente sin necesidad de reestructurar el resto del sistema.
+- Es compatible con las practicas de desarrollo agil y con la estrategia de branching seleccionada (GitHub Flow).
+
+---
+
+## 6. Consecuencias
+
+### 6.1 Consecuencias positivas
+
+- Despliegue simplificado en una sola unidad ejecutable.
+- Codigo organizado y predecible que facilita el onboarding de nuevos desarrolladores.
+- Pruebas de integracion mas sencillas al no requerir comunicacion entre procesos distribuidos.
+- Reduccion del tiempo de desarrollo inicial respecto a una arquitectura distribuida.
+
+### 6.2 Limitaciones conocidas
+
+- Cualquier cambio implica redesplegar la aplicacion completa, incluso si el cambio es menor.
+- El escalado horizontal replica toda la aplicacion, no solo el modulo con mayor carga.
+- Requiere disciplina de equipo para respetar las fronteras entre modulos y evitar acoplamiento involuntario.
+
+---
+
+## 7. Buenas Practicas Aplicadas
+
+| Practica | Aplicacion en IUSHPay |
+|---|---|
+| Separacion de responsabilidades | Cada modulo encapsula su logica, acceso a datos e interfaces internas. |
+| Principio de minimo acoplamiento | Los modulos se comunican unicamente mediante contratos (interfaces), nunca por acceso directo a repositorios ajenos. |
+| Inmutabilidad del registro de auditoria | Las transacciones y eventos se registran sin permitir modificacion posterior, garantizando trazabilidad. |
+| Autenticacion sin estado (stateless) | El uso de JWT permite que cualquier instancia del servidor valide una sesion sin consultar estado centralizado. |
+| Validacion en capa de entrada | Toda entrada de datos es validada antes de ser procesada por la logica de negocio, previniendo datos inconsistentes. |
+| Preparacion para CI/CD | La estructura modular facilita la ejecucion de pruebas por modulo y el despliegue automatizado. |
+
+---
+
+## 8. Estado y Vigencia
+
+| Estado | Revisado por | Vigencia |
+|---|---|---|
+| Aprobado | Equipo de Arquitectura | Hasta version 2.0 o cambio de plataforma |
