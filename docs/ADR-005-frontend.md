@@ -52,16 +52,16 @@ Se adopta una arquitectura de frontend móvil basada en **React Native con Expo*
 ### 2.3. Gestión de Estado y Datos
 
 - **Estado global:** Zustand. Almacena el saldo actual, el perfil del usuario y el token de sesión en memoria durante la sesión activa.
-- **Peticiones HTTP:** Axios con interceptores para inyectar el JWT en cada solicitud y manejar renovación automática del access token mediante refresh token (alineado con ADR-001, Capa 1).
+- **Peticiones HTTP:** Axios con interceptores para inyectar el JWT en cada solicitud y manejar renovación automática del access token mediante refresh token (alineado con ADR-004, Capa 1).
 - **Caché de datos:** React Query (TanStack Query) para el historial de transacciones y el saldo, con TTL cortos: 30 segundos para saldo, 2 minutos para historial.
 - El historial de pagos implementará **paginación tipo cursor** y filtros locales (ALL / PARKING / TOP-UPS) sin recargas adicionales al servidor.
 
 ### 2.4. Seguridad y Almacenamiento en Cliente
 
-- El refresh token se almacenará en **`expo-secure-store`** (Keychain en iOS / Keystore en Android). Queda estrictamente **prohibido** usar `AsyncStorage` para datos de sesión o credenciales (alineado con ADR-001, Capa 1).
+- El refresh token se almacenará en **`expo-secure-store`** (Keychain en iOS / Keystore en Android). Queda estrictamente **prohibido** usar `AsyncStorage` para datos de sesión o credenciales (alineado con ADR-004, Capa 1).
 - El access token JWT vive **únicamente en memoria** (estado Zustand). No se persiste en disco bajo ninguna circunstancia.
 - Las pantallas que muestran saldo o datos financieros deben **oscurecer el contenido** cuando la aplicación pasa a segundo plano (evento `AppState` change), previniendo capturas del sistema.
-- No se almacenarán datos de tarjetas, cuentas bancarias ni información de PSE en el dispositivo. El frontend únicamente envía referencias de pago al backend (alineado con ADR-001, Capa 5).
+- No se almacenarán datos de tarjetas, cuentas bancarias ni información de PSE en el dispositivo. El frontend únicamente envía referencias de pago al backend (alineado con ADR-004, Capa 5).
 - El campo Student ID en la pantalla de autenticación deshabilitará el autocompletado del sistema operativo para evitar caché de credenciales.
 
 ### 2.5. Accesibilidad y Diseño Visual
@@ -91,7 +91,7 @@ Se adopta una arquitectura de frontend móvil basada en **React Native con Expo*
 
 - Una única base de código en React Native + Expo cubre iOS y Android, reduciendo el costo de mantenimiento.
 - TypeScript + React Query + Zustand conforman un stack predecible y ampliamente documentado, que acelera la incorporación de nuevos desarrolladores.
-- El uso de `expo-secure-store` garantiza que el refresh token esté protegido por el hardware del dispositivo (enclave seguro), alineado con ADR-001.
+- El uso de `expo-secure-store` garantiza que el refresh token esté protegido por el hardware del dispositivo (enclave seguro), alineado con ADR-004.
 - La arquitectura de navegación refleja fielmente el flujo del prototipo, minimizando discrepancias entre diseño e implementación.
 
 ### Compromisos y Consideraciones
@@ -115,7 +115,7 @@ Se adopta una arquitectura de frontend móvil basada en **React Native con Expo*
 
 ## 5. Notas Adicionales
 
-Este ADR complementa y extiende el [ADR-001](./ADR-001-seguridad-transversal.md) (Estrategia de Seguridad Transversal). Cualquier cambio en el mecanismo de autenticación o en la gestión de tokens definido en ADR-001 debe evaluarse también en el contexto de este documento.
+Este ADR complementa y extiende el [ADR-004](./ADR-004-seguridad-transversal.md) (Estrategia de Seguridad Transversal). Cualquier cambio en el mecanismo de autenticación o en la gestión de tokens definido en ADR-004 debe evaluarse también en el contexto de este documento.
 
 **Momentos de revisión sugeridos:**
 
