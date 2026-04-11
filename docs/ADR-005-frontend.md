@@ -24,7 +24,7 @@ La ausencia de una decisión explícita sobre la arquitectura del frontend puede
 | Top-Up Wallet | Recarga del saldo de la wallet | Selector de monto ($10, $20, $50, $100), campo personalizado, Apple Pay, botón de confirmación con slide |
 | Payment History | Historial de transacciones y recargas | Filtros ALL / PARKING / TOP-UPS, lista agrupada por fecha, buscador |
 
-Dado que la aplicación es de naturaleza móvil y maneja datos financieros sensibles, se requiere una decisión arquitectónica que garantice rendimiento, seguridad en cliente y alineación con el [ADR-001](./ADR-001-seguridad-transversal.md).
+Dado que la aplicación es de naturaleza móvil y maneja datos financieros sensibles, se requiere una decisión arquitectónica que garantice rendimiento, seguridad en cliente y alineación con el [ADR-004](./ADR-004-seguridad-transversal.md).
 
 ---
 
