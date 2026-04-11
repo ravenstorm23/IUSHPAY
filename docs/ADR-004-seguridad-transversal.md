@@ -1,4 +1,4 @@
-# ADR-001 — Estrategia de Seguridad Transversal
+# ADR-004 — Estrategia de Seguridad Transversal
 
 | Campo | Valor |
 |---|---|
