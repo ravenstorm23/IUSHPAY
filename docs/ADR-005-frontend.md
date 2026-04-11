@@ -1,4 +1,4 @@
-# ADR-002 — Arquitectura y Tecnología del Frontend
+# ADR-005 — Arquitectura y Tecnología del Frontend
 
 | Campo | Valor |
 |---|---|
