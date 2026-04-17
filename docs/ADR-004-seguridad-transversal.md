@@ -2,9 +2,9 @@
 
 | Campo | Valor |
 |---|---|
-| **Estado** | ✅ Aceptado |
+| **Estado** | Aceptado |
 | **Versión** | 1.0 |
-| **Fecha** | Abril 2025 |
+| **Fecha** | Abril 2026 |
 | **Autor** | Equipo de Seguridad — IUSHPay |
 | **Proyecto** | IUSHPay — IUSH |
 
