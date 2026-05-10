@@ -1,0 +1,13 @@
+{
+  "profiles": {
+    "IUSHPAY.WebAPI": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "swagger",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:61170;http://localhost:61175"
+    }
+  }
+}
