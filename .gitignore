@@ -1,0 +1,23 @@
+# .NET
+*.user
+*.suo
+.vs/
+bin/
+obj/
+*.log
+
+# Variables de entorno - NUNCA subir al repo
+.env
+.env.local
+.env.production
+appsettings.Development.json
+appsettings.Production.json
+
+# Node / React Native
+node_modules/
+.expo/
+dist/
+
+# OS
+.DS_Store
+Thumbs.db
