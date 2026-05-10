@@ -1,10 +1,11 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
 	<PropertyGroup>
 		<TargetFramework>net8.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
-	</PropertyGroup>
+	  <UserSecretsId>a7487be4-1d83-4dc3-a34f-cfffb62a8b13</UserSecretsId>
+  </PropertyGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\IUSHPAY.Application\IUSHPAY.Application.csproj" />
