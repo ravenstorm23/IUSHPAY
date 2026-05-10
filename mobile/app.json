@@ -1,0 +1,29 @@
+{
+  "expo": {
+    "name": "IUSHPay",
+    "slug": "iushpay-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "co.edu.iush.iushpay"
+    },
+    "android": {
+      "package": "co.edu.iush.iushpay",
+      "permissions": [
+        "CAMERA"
+      ]
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "IUSHPay necesita acceso a la cámara para escanear códigos QR en portería."
+        }
+      ],
+      "expo-asset",
+      "expo-secure-store"
+    ]
+  }
+}
