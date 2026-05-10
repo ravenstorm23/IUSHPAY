@@ -1,10 +1,10 @@
-# 💳 IUSHPay
+#  IUSHPay
 
 > Plataforma institucional de pagos y control de acceso al parqueadero — Institución Universitaria Salazar y Herrera
 
 ---
 
-## 📋 Descripción
+##  Descripción
 
 IUSHPay es una plataforma digital que integra una **wallet institucional**, **validación de acceso por QR dinámico** y conexión con pasarelas de pago (PSE) para optimizar el sistema de pagos y control de acceso al parqueadero de la IUSH.
 
@@ -12,7 +12,7 @@ Elimina los procesos manuales en portería, las inconsistencias de saldo y el fr
 
 ---
 
-## 🚨 Problema que resuelve
+##  Problema que resuelve
 
 | Problema | Impacto |
 |---|---|
@@ -24,18 +24,18 @@ Elimina los procesos manuales en portería, las inconsistencias de saldo y el fr
 
 ---
 
-## ✨ Funcionalidades principales
+##  Funcionalidades principales
 
-- 👛 **Wallet institucional** — Saldo unificado por usuario, recarga vía PSE
-- 📱 **QR dinámico** — Código único por sesión, expira en 60 segundos
-- 🚗 **Control de parqueadero** — Tarifas automáticas, cobro al salir
-- 🔐 **Autenticación segura** — JWT + refresh tokens, roles por usuario
-- 📊 **Auditoría completa** — Logs inmutables de cada transacción
-- 🔔 **Notificaciones** — Alertas de recarga, cobro y saldo bajo
+-  **Wallet institucional** — Saldo unificado por usuario, recarga vía PSE
+-  **QR dinámico** — Código único por sesión, expira en 60 segundos
+-  **Control de parqueadero** — Tarifas automáticas, cobro al salir
+-  **Autenticación segura** — JWT + refresh tokens, roles por usuario
+-  **Auditoría completa** — Logs inmutables de cada transacción
+-  **Notificaciones** — Alertas de recarga, cobro y saldo bajo
 
 ---
 
-## 🛠 Stack tecnológico
+##  Stack tecnológico
 
 | Capa | Tecnología |
 |---|---|
@@ -49,7 +49,7 @@ Elimina los procesos manuales en portería, las inconsistencias de saldo y el fr
 
 ---
 
-## 🏗 Arquitectura
+## Arquitectura
 
 El sistema sigue una arquitectura de **Monolito Modular** con **Clean Architecture** como patrón interno.
 
@@ -77,7 +77,7 @@ IUSHPay/
 
 ---
 
-## 👥 Roles del sistema
+##  Roles del sistema
 
 | Rol | Permisos |
 |---|---|
