@@ -1,4 +1,5 @@
 ﻿using IUSHPAY.Infrastructure.Persistence;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace IUSHPAY.Infrastructure.Persistence;
@@ -22,6 +23,7 @@ public static class DbSeeder
 	public static async Task SeedAsync(AppDbContext db)
 	{
 		bool anyCreated = false;
+		var hasher = new PasswordHasher<string>();
 
 		foreach (var (email, password, fullName) in Admins)
 		{
@@ -29,7 +31,7 @@ public static class DbSeeder
 			bool exists = await db.Users.AnyAsync(u => u.Email == email);
 			if (exists) continue;
 
-			string hash = BCrypt.Net.BCrypt.HashPassword(password);
+			string hash = hasher.HashPassword(email, password);
 
 			// Usa el factory method existente en la entidad User
 			var admin = User.CreateAdmin(email, hash);

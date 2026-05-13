@@ -7,11 +7,11 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\IUSHPAY.Domain\IUSHPAY.Domain.csproj" />
+	  <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.3.10" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+		<ProjectReference Include="..\IUSHPAY.Domain\IUSHPAY.Domain.csproj" />
 	</ItemGroup>
 
 </Project>
