@@ -1,8 +1,8 @@
+using System.Security.Cryptography;
 using IUSHPAY.Application.Common.Interfaces;
 using IUSHPAY.Application.Common.Models;
 using IUSHPAY.Application.DTOs.Auth;
 using IUSHPAY.Domain.Interfaces.Repositories;
-using Microsoft.AspNetCore.Identity;
 
 namespace IUSHPAY.Application.UseCases.Auth.Login;
 
@@ -10,7 +10,6 @@ public class LoginHandler
 {
 	private readonly IUserRepository _userRepo;
 	private readonly IJwtService _jwtService;
-	private static readonly PasswordHasher<string> _hasher = new();
 
 	public LoginHandler(IUserRepository userRepo, IJwtService jwtService)
 	{
@@ -27,8 +26,7 @@ public class LoginHandler
 		if (user == null)
 			return Result<AuthResponseDto>.Failure("Usuario no encontrado");
 
-		var result = _hasher.VerifyHashedPassword(cmd.Email, user.PasswordHash, cmd.Password);
-		if (result == PasswordVerificationResult.Failed)
+		if (!VerifyPassword(cmd.Password, user.PasswordHash))
 			return Result<AuthResponseDto>.Failure("Contraseña incorrecta");
 
 		var token = _jwtService.GenerateToken(user);
@@ -41,5 +39,23 @@ public class LoginHandler
 			Role = user.Role,
 			UserId = user.Id
 		});
+	}
+
+	private static bool VerifyPassword(string password, string stored)
+	{
+		try
+		{
+			var parts = stored.Split('.');
+			if (parts.Length != 2) return false;
+			byte[] salt = Convert.FromBase64String(parts[0]);
+			byte[] expectedHash = Convert.FromBase64String(parts[1]);
+			var pbkdf2 = new Rfc2898DeriveBytes(password, salt, 100000, HashAlgorithmName.SHA256);
+			byte[] actualHash = pbkdf2.GetBytes(32);
+			return CryptographicOperations.FixedTimeEquals(actualHash, expectedHash);
+		}
+		catch
+		{
+			return false;
+		}
 	}
 }
