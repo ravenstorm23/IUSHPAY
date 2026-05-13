@@ -40,7 +40,7 @@ COPY --from=build /app/publish .
 # Cambiar propietario de los archivos al usuario no-root
 RUN chown -R appuser:appgroup /app
 
-#USER appuser
+USER appuser
 
 # Puerto por defecto de ASP.NET Core
 EXPOSE 8080
