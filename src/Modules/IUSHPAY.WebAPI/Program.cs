@@ -147,10 +147,10 @@ using (var scope = app.Services.CreateScope())
 		.GetRequiredService<AppDbContext>();
 
 	// 1. Aplica migraciones pendientes
-	db.Database.Migrate();
+	// db.Database.Migrate();
 
 	// 2. Siembra los 3 admins de TI si aún no existen
-	await DbSeeder.SeedAsync(db);
+	// await DbSeeder.SeedAsync(db);
 }
 
 

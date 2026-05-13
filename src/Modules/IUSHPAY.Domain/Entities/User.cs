@@ -46,7 +46,7 @@ public class User
 	/// Crea un usuario administrador (Área TI).
 	/// </summary>
 	/// <param name="email">Correo institucional del admin.</param>
-	/// <param name="passwordHash">Hash BCrypt de la contraseña.</param>
+	/// <param name="passwordHash">Hash de la contraseña.</param>
 	/// <param name="fullName">Nombre completo; por defecto "Administrador TI".</param>
 	public static User CreateAdmin(string email, string passwordHash, string fullName = "Administrador TI")
 	{
