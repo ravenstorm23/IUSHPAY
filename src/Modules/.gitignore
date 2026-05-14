@@ -1,0 +1,69 @@
+# =====================
+# Archivos de solución
+# =====================
+*.slnx
+
+# =====================
+# Archivos de compilación
+# =====================
+bin/
+obj/
+
+# =====================
+# Visual Studio
+# =====================
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.userprefs
+
+# =====================
+# Configuración local sensible
+# =====================
+appsettings.json                 
+appsettings.Production.json       
+appsettings.Development.json
+appsettings.Local.json
+*.local.json
+secrets.json
+
+# =====================
+# Entity Framework - Migraciones generadas localmente
+# (descomenta si no quieres subir migraciones)
+# =====================
+# Migrations/
+
+# =====================
+# Logs
+# =====================
+*.log
+logs/
+
+# =====================
+# Archivos del sistema operativo
+# =====================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# =====================
+# Rider / JetBrains
+# =====================
+.idea/
+*.DotSettings.user
+
+# =====================
+# Variables de entorno
+# =====================
+.env
+.env.*
+
+# =====================
+# NuGet
+# =====================
+*.nupkg
+*.snupkg
+project.lock.json
+packages/

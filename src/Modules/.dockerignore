@@ -1,0 +1,63 @@
+# ================================
+# Git
+# ================================
+.git
+.gitignore
+
+# ================================
+# Compilación local
+# ================================
+**/bin/
+**/obj/
+
+# ================================
+# Visual Studio
+# ================================
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# ================================
+# Secretos y configuración sensible
+# ================================
+appsettings.Development.json
+appsettings.Local.json
+appsettings.Production.json
+*.local.json
+secrets.json
+.env
+.env.*
+
+# ================================
+# Logs
+# ================================
+*.log
+logs/
+
+# ================================
+# Sistema operativo
+# ================================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ================================
+# Rider / JetBrains
+# ================================
+.idea/
+*.DotSettings.user
+
+# ================================
+# Docker
+# ================================
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# ================================
+# README y docs
+# ================================
+README.md
+docs/
