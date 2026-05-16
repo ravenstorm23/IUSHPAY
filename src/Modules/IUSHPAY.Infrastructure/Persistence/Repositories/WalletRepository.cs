@@ -13,19 +13,15 @@ public class WalletRepository : IWalletRepository
 		_db = db;
 	}
 
-	// Para consultas de historial/balance donde no se va a modificar
 	public async Task<Wallet?> GetByUserIdAsync(Guid userId)
 		=> await _db.Wallets
 			.Include(w => w.Transactions)
 			.FirstOrDefaultAsync(x => x.UserId == userId);
 
-	// Para modificaciones (webhook, recarga): sin Include para evitar
-	// que EF trackee las transacciones existentes y las confunda con nuevas
 	public async Task<Wallet?> GetByIdAsync(Guid walletId)
 		=> await _db.Wallets
 			.FirstOrDefaultAsync(x => x.Id == walletId);
 
-	// Para consultas de historial donde se necesita el ID de la wallet
 	public async Task<Wallet?> GetByIdWithTransactionsAsync(Guid walletId)
 		=> await _db.Wallets
 			.Include(w => w.Transactions)
@@ -33,13 +29,19 @@ public class WalletRepository : IWalletRepository
 
 	public async Task UpdateAsync(Wallet wallet)
 	{
-		// Solo marcar la wallet como modificada
-		_db.Entry(wallet).State = EntityState.Modified;
+		// Actualizar el balance de la wallet directamente en la BD
+		// sin tocar el grafo de transacciones
+		await _db.Wallets
+			.Where(w => w.Id == wallet.Id)
+			.ExecuteUpdateAsync(s => s
+				.SetProperty(w => w.Balance, wallet.Balance)
+				.SetProperty(w => w.UpdatedAt, wallet.UpdatedAt));
 
-		// Insertar explícitamente las transacciones nuevas (Detached = recién creadas)
+		// Insertar las transacciones nuevas directamente
 		foreach (var tx in wallet.Transactions)
 		{
-			if (_db.Entry(tx).State == EntityState.Detached)
+			var exists = await _db.Transactions.AnyAsync(t => t.Id == tx.Id);
+			if (!exists)
 				await _db.Transactions.AddAsync(tx);
 		}
 
