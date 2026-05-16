@@ -11,7 +11,8 @@ COPY IUSHPAY.Infrastructure/IUSHPAY.Infrastructure.csproj IUSHPAY.Infrastructure
 COPY IUSHPAY.WebAPI/IUSHPAY.WebAPI.csproj             IUSHPAY.WebAPI/
 
 # Restaurar dependencias (cacheado si los .csproj no cambian)
-RUN dotnet restore IUSHPAY.WebAPI/IUSHPAY.WebAPI.csproj
+RUN dotnet restore IUSHPAY.WebAPI/IUSHPAY.WebAPI.csproj \
+    --disable-parallel
 
 # Copiar el resto del código fuente
 COPY IUSHPAY.Domain/           IUSHPAY.Domain/
