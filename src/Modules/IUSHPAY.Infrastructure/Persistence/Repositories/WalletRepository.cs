@@ -33,7 +33,16 @@ public class WalletRepository : IWalletRepository
 
 	public async Task UpdateAsync(Wallet wallet)
 	{
+		// Solo marcar la wallet como modificada
 		_db.Entry(wallet).State = EntityState.Modified;
+
+		// Insertar explícitamente las transacciones nuevas (Detached = recién creadas)
+		foreach (var tx in wallet.Transactions)
+		{
+			if (_db.Entry(tx).State == EntityState.Detached)
+				await _db.Transactions.AddAsync(tx);
+		}
+
 		await _db.SaveChangesAsync();
 	}
 }
