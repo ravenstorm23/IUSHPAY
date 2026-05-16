@@ -1,3 +1,4 @@
+using IUSHPAY.Application.Common.Interfaces;
 using IUSHPAY.Application.UseCases.Access.GenerateQR;
 using IUSHPAY.Application.UseCases.Access.GetLog;
 using IUSHPAY.Application.UseCases.Access.ValidateAccess;
@@ -9,32 +10,39 @@ namespace IUSHPAY.WebAPI.Controllers;
 
 [ApiController]
 [Route("api/access")]
+[Authorize]
 public class AccessController : ControllerBase
 {
 	private readonly GenerateQRHandler _qrHandler;
 	private readonly ValidateAccessHandler _accessHandler;
 	private readonly GetAccessLogHandler _logHandler;
+	private readonly ICurrentUserService _currentUser;
 
 	public AccessController(
 		GenerateQRHandler qrHandler,
 		ValidateAccessHandler accessHandler,
-		GetAccessLogHandler logHandler)
+		GetAccessLogHandler logHandler,
+		ICurrentUserService currentUser)
 	{
 		_qrHandler = qrHandler;
 		_accessHandler = accessHandler;
 		_logHandler = logHandler;
+		_currentUser = currentUser;
 	}
 
-	/// <summary>Genera QR de acceso para el usuario autenticado</summary>
-	[HttpGet("qr/{userId:guid}")]
-	[Authorize]
-	public async Task<IActionResult> GenerateQR(Guid userId)
+	/// <summary>Genera QR de acceso — usa el userId del token automáticamente</summary>
+	[HttpGet("qr")]
+	public async Task<IActionResult> GenerateQR()
 	{
+		// FIX: userId viene del token, no de la URL
+		var userId = _currentUser.UserId;
+		if (userId == Guid.Empty) return Unauthorized();
+
 		var result = await _qrHandler.HandleAsync(new GenerateQRCommand(userId));
 		return result.IsSuccess ? Ok(result.Value) : BadRequest(new { message = result.Error });
 	}
 
-	/// <summary>Valida QR y descuenta saldo — solo para lectores del parqueadero (Admin)</summary>
+	/// <summary>Valida QR y descuenta saldo — solo Admin</summary>
 	[HttpPost("validate")]
 	[Authorize(Roles = "Admin")]
 	public async Task<IActionResult> Validate([FromBody] AccessRequestDto dto)
@@ -44,7 +52,7 @@ public class AccessController : ControllerBase
 		return result.IsSuccess ? Ok(result.Value) : BadRequest(new { message = result.Error });
 	}
 
-	/// <summary>Consulta el log de accesos al parqueadero — solo Admin</summary>
+	/// <summary>Log de accesos al parqueadero — solo Admin</summary>
 	[HttpGet("log")]
 	[Authorize(Roles = "Admin")]
 	public async Task<IActionResult> GetLog([FromQuery] DateTime? from, [FromQuery] DateTime? to)

@@ -12,50 +12,60 @@ namespace IUSHPAY.WebAPI.Controllers;
 [Authorize]
 public class WalletController : ControllerBase
 {
-    private readonly GetBalanceHandler _balanceHandler;
-    private readonly RechargeWalletHandler _rechargeHandler;
-    private readonly GetTransactionHistoryHandler _historyHandler;
-    private readonly ICurrentUserService _currentUser;
+	private readonly GetBalanceHandler _balanceHandler;
+	private readonly RechargeWalletHandler _rechargeHandler;
+	private readonly GetTransactionHistoryHandler _historyHandler;
+	private readonly ICurrentUserService _currentUser;
 
-    public WalletController(
-        GetBalanceHandler balanceHandler,
-        RechargeWalletHandler rechargeHandler,
-        GetTransactionHistoryHandler historyHandler,
-        ICurrentUserService currentUser)
-    {
-        _balanceHandler = balanceHandler;
-        _rechargeHandler = rechargeHandler;
-        _historyHandler = historyHandler;
-        _currentUser = currentUser;
-    }
+	public WalletController(
+		GetBalanceHandler balanceHandler,
+		RechargeWalletHandler rechargeHandler,
+		GetTransactionHistoryHandler historyHandler,
+		ICurrentUserService currentUser)
+	{
+		_balanceHandler = balanceHandler;
+		_rechargeHandler = rechargeHandler;
+		_historyHandler = historyHandler;
+		_currentUser = currentUser;
+	}
 
-    [HttpGet("{userId:guid}")]
-    public async Task<IActionResult> GetBalance(Guid userId)
-    {
-        if (_currentUser.UserId != userId && _currentUser.Role != "Admin")
-            return Forbid();
+	/// <summary>Consulta el saldo — usa el userId del token automáticamente</summary>
+	[HttpGet("balance")]
+	public async Task<IActionResult> GetBalance()
+	{
+		// FIX: userId viene del token, no de la URL
+		var userId = _currentUser.UserId;
+		if (userId == Guid.Empty) return Unauthorized();
 
-        var result = await _balanceHandler.HandleAsync(new GetBalanceQuery(userId));
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(new { message = result.Error });
-    }
+		var result = await _balanceHandler.HandleAsync(new GetBalanceQuery(userId));
+		return result.IsSuccess ? Ok(result.Value) : BadRequest(new { message = result.Error });
+	}
 
-    [HttpPost("recharge")]
-    public async Task<IActionResult> Recharge([FromBody] RechargeWalletCommand cmd)
-    {
-        if (_currentUser.UserId != cmd.UserId && _currentUser.Role != "Admin")
-            return Forbid();
+	/// <summary>Recarga saldo — usa el userId del token automáticamente</summary>
+	[HttpPost("recharge")]
+	public async Task<IActionResult> Recharge([FromBody] RechargeRequest request)
+	{
+		// FIX: userId viene del token, no del body
+		var userId = _currentUser.UserId;
+		if (userId == Guid.Empty) return Unauthorized();
 
-        var result = await _rechargeHandler.HandleAsync(cmd);
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(new { message = result.Error });
-    }
+		var cmd = new RechargeWalletCommand(userId, request.Amount);
+		var result = await _rechargeHandler.HandleAsync(cmd);
+		return result.IsSuccess ? Ok(result.Value) : BadRequest(new { message = result.Error });
+	}
 
-    [HttpGet("{userId:guid}/history")]
-    public async Task<IActionResult> GetHistory(Guid userId)
-    {
-        if (_currentUser.UserId != userId && _currentUser.Role != "Admin")
-            return Forbid();
+	/// <summary>Historial de transacciones — usa el userId del token automáticamente</summary>
+	[HttpGet("history")]
+	public async Task<IActionResult> GetHistory()
+	{
+		// FIX: userId viene del token, no de la URL
+		var userId = _currentUser.UserId;
+		if (userId == Guid.Empty) return Unauthorized();
 
-        var result = await _historyHandler.HandleAsync(new GetTransactionHistoryQuery(userId));
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(new { message = result.Error });
-    }
+		var result = await _historyHandler.HandleAsync(new GetTransactionHistoryQuery(userId));
+		return result.IsSuccess ? Ok(result.Value) : BadRequest(new { message = result.Error });
+	}
 }
+
+/// <summary>Solo pide el monto — el userId lo toma el servidor del token JWT</summary>
+public record RechargeRequest(decimal Amount);
