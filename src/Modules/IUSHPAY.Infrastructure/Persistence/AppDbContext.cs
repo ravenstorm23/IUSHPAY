@@ -1,5 +1,5 @@
 ﻿using IUSHPAY.Domain.Entities;
-
+using IUSHPAY.Infrastructure.Persistence.Configurations;
 using Microsoft.EntityFrameworkCore;
 
 namespace IUSHPAY.Infrastructure.Persistence;
@@ -24,61 +24,15 @@ public class AppDbContext : DbContext
 	{
 		base.OnModelCreating(builder);
 
+		// Aplica todas las configuraciones de la carpeta Configurations/
+		// Esto reemplaza la configuración inline anterior que ignoraba
+		// el backing field _transactions de Wallet, causando el error 500.
+		builder.ApplyConfiguration(new UserConfiguration());
+		builder.ApplyConfiguration(new WalletConfiguration());
+		builder.ApplyConfiguration(new TransactionConfiguration());
 
 		// =====================================================
-		// USER
-		// =====================================================
-		builder.Entity<User>(entity =>
-		{
-			entity.HasKey(x => x.Id);
-
-			entity.Property(x => x.FullName)
-				.IsRequired();
-
-			entity.Property(x => x.Email)
-				.IsRequired();
-
-			entity.HasIndex(x => x.Email)
-				.IsUnique();
-		});
-
-
-		// =====================================================
-		// WALLET
-		// =====================================================
-		builder.Entity<Wallet>(entity =>
-		{
-			entity.HasKey(x => x.Id);
-
-			entity.Property(x => x.Balance)
-				.HasColumnType("numeric(18,2)");
-
-			entity
-				.HasOne(x => x.User)
-				.WithOne(x => x.Wallet)
-				.HasForeignKey<Wallet>(x => x.UserId);
-		});
-
-
-		// =====================================================
-		// TRANSACTION
-		// =====================================================
-		builder.Entity<Transaction>(entity =>
-		{
-			entity.HasKey(x => x.Id);
-
-			entity.Property(x => x.Amount)
-				.HasColumnType("numeric(18,2)");
-
-			entity
-				.HasOne(x => x.Wallet)
-				.WithMany(x => x.Transactions)
-				.HasForeignKey(x => x.WalletId);
-		});
-
-
-		// =====================================================
-		// PARKING ACCESS
+		// PARKING ACCESS (sin clase de configuración propia)
 		// =====================================================
 		builder.Entity<ParkingAccess>(entity =>
 		{
