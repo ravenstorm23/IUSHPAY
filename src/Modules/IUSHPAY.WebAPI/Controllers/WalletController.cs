@@ -9,7 +9,7 @@ namespace IUSHPAY.WebAPI.Controllers;
 
 [ApiController]
 [Route("api/wallet")]
-[Authorize]
+//[Authorize]
 public class WalletController : ControllerBase
 {
 	private readonly GetBalanceHandler _balanceHandler;
