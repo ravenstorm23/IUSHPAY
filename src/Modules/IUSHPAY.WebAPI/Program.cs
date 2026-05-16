@@ -2,23 +2,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.ResponseCompression;
 
+using IUSHPAY.Application;
 using IUSHPAY.Infrastructure;
 using IUSHPAY.Infrastructure.Persistence;
 
 using IUSHPAY.WebAPI.Middleware;
-
-using IUSHPAY.Application.UseCases.Wallet.GetBalance;
-using IUSHPAY.Application.UseCases.Wallet.Recharge;
-using IUSHPAY.Application.UseCases.Wallet.GetHistory;
-
-using IUSHPAY.Application.UseCases.Payment.Webhook;
-
-using IUSHPAY.Application.UseCases.Access.GenerateQR;
-using IUSHPAY.Application.UseCases.Access.GetLog;
-using IUSHPAY.Application.UseCases.Access.ValidateAccess;
-
-using IUSHPAY.Application.UseCases.Auth.Login;
-using IUSHPAY.Application.UseCases.Auth.Register;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,23 +20,7 @@ builder.Services.AddInfrastructure(builder.Configuration);
 // =====================================================
 // APPLICATION HANDLERS
 // =====================================================
-builder.Services.AddScoped<GetBalanceHandler>();
-
-builder.Services.AddScoped<RechargeWalletHandler>();
-
-builder.Services.AddScoped<GetTransactionHistoryHandler>();
-
-builder.Services.AddScoped<ProcessPSEWebhookHandler>();
-
-builder.Services.AddScoped<GenerateQRHandler>();
-
-builder.Services.AddScoped<ValidateAccessHandler>();
-
-builder.Services.AddScoped<GetAccessLogHandler>();
-
-builder.Services.AddScoped<LoginHandler>();
-
-builder.Services.AddScoped<RegisterHandler>();
+builder.Services.AddApplication();
 
 
 // =====================================================
@@ -176,17 +148,45 @@ app.MapHealthChecks("/health");
 
 // =====================================================
 // AUTO DATABASE MIGRATION + SEED
+// FIX: EnableRetryOnFailure no es compatible con Migrate(),
+//      se implementa reintento manual con 3 intentos y 5s de espera.
 // =====================================================
 using (var scope = app.Services.CreateScope())
 {
-	var db = scope.ServiceProvider
-		.GetRequiredService<AppDbContext>();
+	var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+	var logger = scope.ServiceProvider
+		.GetRequiredService<ILogger<AppDbContext>>();
 
-	// 1. Aplica migraciones pendientes
-	db.Database.Migrate();
+	var retries = 3;
+	while (retries > 0)
+	{
+		try
+		{
+			logger.LogInformation("Aplicando migraciones... (intentos restantes: {Retries})", retries);
 
-	// 2. Siembra los 3 admins de TI si aún no existen
-	await DbSeeder.SeedAsync(db);
+			// 1. Aplica migraciones pendientes
+			db.Database.Migrate();
+
+			// 2. Siembra los 3 admins de TI si aún no existen
+			await DbSeeder.SeedAsync(db);
+
+			logger.LogInformation("Migraciones aplicadas correctamente.");
+			break;
+		}
+		catch (Exception ex)
+		{
+			retries--;
+			logger.LogError(ex, "Error al aplicar migraciones. Intentos restantes: {Retries}", retries);
+
+			if (retries == 0)
+			{
+				logger.LogCritical("No se pudo conectar a la base de datos después de 3 intentos.");
+				throw;
+			}
+
+			await Task.Delay(TimeSpan.FromSeconds(5));
+		}
+	}
 }
 
 

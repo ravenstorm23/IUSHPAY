@@ -1,3 +1,3 @@
 namespace IUSHPAY.Application.UseCases.Wallet.GetHistory;
 
-public record GetTransactionHistoryQuery(Guid WalletId);
+public record GetTransactionHistoryQuery(Guid UserId);

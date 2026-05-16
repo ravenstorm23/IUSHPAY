@@ -47,15 +47,16 @@ public class User
 	/// <param name="fullName">Nombre completo; por defecto "Administrador TI".</param>
 	public static User CreateAdmin(string email, string passwordHash, string fullName = "Administrador TI")
 	{
+		var id = Guid.NewGuid();
 		return new User
 		{
-			Id = Guid.NewGuid(),
+			Id = id,
 			InstitutionalCode = "ADMIN",
 			FullName = fullName,
 			Email = email,
 			PasswordHash = passwordHash,
 			Role = "Admin",
-			Wallet = Wallet.CreateFor(Guid.NewGuid()),
+			Wallet = Wallet.CreateFor(id),
 			CreatedAt = DateTime.UtcNow
 		};
 	}

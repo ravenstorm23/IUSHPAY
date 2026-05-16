@@ -5,9 +5,9 @@ namespace IUSHPAY.Application.UseCases.Access.GenerateQR;
 
 public class GenerateQRHandler
 {
-	private readonly IQRService _qr;
+	private readonly IQRGeneratorService _qr;
 
-	public GenerateQRHandler(IQRService qr)
+	public GenerateQRHandler(IQRGeneratorService qr)
 	{
 		_qr = qr;
 	}

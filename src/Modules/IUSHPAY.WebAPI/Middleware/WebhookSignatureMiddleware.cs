@@ -18,6 +18,8 @@ public class WebhookSignatureMiddleware
 			if (!context.Request.Headers.ContainsKey("X-Signature"))
 			{
 				context.Response.StatusCode = 401;
+				context.Response.ContentType = "application/json";
+				await context.Response.WriteAsync("{\"message\":\"Firma del webhook requerida (X-Signature)\"}");
 				return;
 			}
 		}

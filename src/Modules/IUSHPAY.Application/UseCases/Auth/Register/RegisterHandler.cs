@@ -1,3 +1,5 @@
+using FluentValidation;
+using IUSHPAY.Application.Behaviors;
 using IUSHPAY.Application.Common.Interfaces;
 using IUSHPAY.Application.Common.Models;
 using IUSHPAY.Application.DTOs.Auth;
@@ -10,18 +12,23 @@ public class RegisterHandler
 {
     private readonly IUserRepository _userRepo;
     private readonly IJwtService _jwtService;
+    private readonly ValidationBehavior<RegisterCommand> _validation;
 
-    public RegisterHandler(IUserRepository userRepo, IJwtService jwtService)
+    public RegisterHandler(
+        IUserRepository userRepo,
+        IJwtService jwtService,
+        IEnumerable<IValidator<RegisterCommand>> validators)
     {
         _userRepo = userRepo;
         _jwtService = jwtService;
+        _validation = new ValidationBehavior<RegisterCommand>(validators);
     }
 
-    public async Task<Result<AuthResponseDto>> HandleAsync(RegisterCommand cmd)
-    {
-        if (string.IsNullOrWhiteSpace(cmd.Email) || string.IsNullOrWhiteSpace(cmd.Password))
-            return Result<AuthResponseDto>.Failure("Email y contraseña son obligatorios");
+    public Task<Result<AuthResponseDto>> HandleAsync(RegisterCommand cmd)
+        => _validation.ValidateAndHandleAsync(cmd, ExecuteAsync);
 
+    private async Task<Result<AuthResponseDto>> ExecuteAsync(RegisterCommand cmd)
+    {
         if (await _userRepo.ExistsByEmailAsync(cmd.Email))
             return Result<AuthResponseDto>.Failure("Ya existe un usuario con ese email");
 
@@ -35,7 +42,6 @@ public class RegisterHandler
 
         await _userRepo.AddAsync(user);
 
-        // Genera el token directamente tras el registro — evita el segundo request de login
         var token = _jwtService.GenerateToken(user);
 
         return Result<AuthResponseDto>.Success(new AuthResponseDto
