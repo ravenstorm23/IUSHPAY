@@ -27,7 +27,12 @@ public class WalletRepository : IWalletRepository
 
 	public async Task UpdateAsync(Wallet wallet)
 	{
-		_db.Wallets.Update(wallet);
+		// FIX: Update() marcaba todo el grafo como Modified, causando que EF
+		// intentara hacer UPDATE de transacciones ya existentes en vez de INSERT,
+		// lo que resultaba en el error de concurrencia optimista (500).
+		// Entry().State solo marca la wallet, las transacciones nuevas las
+		// detecta EF automáticamente por el tracking del Include().
+		_db.Entry(wallet).State = EntityState.Modified;
 		await _db.SaveChangesAsync();
 	}
 }
