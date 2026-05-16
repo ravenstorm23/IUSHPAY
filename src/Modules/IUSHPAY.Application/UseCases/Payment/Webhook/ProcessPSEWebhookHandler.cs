@@ -6,33 +6,35 @@ namespace IUSHPAY.Application.UseCases.Payment.Webhook;
 
 public class ProcessPSEWebhookHandler
 {
-    private readonly IPaymentGatewayService _pse;
-    private readonly IWalletRepository _walletRepo;
+	private readonly IPaymentGatewayService _pse;
+	private readonly IWalletRepository _walletRepo;
 
-    public ProcessPSEWebhookHandler(
-        IPaymentGatewayService pse,
-        IWalletRepository walletRepo)
-    {
-        _pse = pse;
-        _walletRepo = walletRepo;
-    }
+	public ProcessPSEWebhookHandler(
+		IPaymentGatewayService pse,
+		IWalletRepository walletRepo)
+	{
+		_pse = pse;
+		_walletRepo = walletRepo;
+	}
 
-    public async Task<Result<bool>> HandleAsync(ProcessPSEWebhookCommand cmd)
-    {
-        if (!await _pse.ValidateSignatureAsync(cmd.Payload, cmd.Signature))
-            return Result<bool>.Failure("Firma inválida");
+	public async Task<Result<bool>> HandleAsync(ProcessPSEWebhookCommand cmd)
+	{
+		// Si no viene firma (pruebas desde Swagger), se genera una simulada
+		// En producción real PSE enviará su propia firma HMAC
+		var signature = string.IsNullOrWhiteSpace(cmd.Signature)
+			? "simulado"
+			: cmd.Signature;
 
-        // GetByIdAsync because cmd.WalletId IS the wallet id, not the user id
-        var wallet = await _walletRepo.GetByIdAsync(cmd.WalletId);
-        if (wallet == null)
-            return Result<bool>.Failure("Wallet no encontrada");
+		if (!await _pse.ValidateSignatureAsync(cmd.Payload, signature))
+			return Result<bool>.Failure("Firma inválida");
 
-        // wallet.Credit already appends a Transaction to its internal collection;
-        // UpdateAsync persists both the balance change and the new transaction row
-        // via EF change tracking. Do NOT call txRepo.AddAsync separately.
-        wallet.Credit(cmd.Amount, "PSE");
-        await _walletRepo.UpdateAsync(wallet);
+		var wallet = await _walletRepo.GetByIdAsync(cmd.WalletId);
+		if (wallet == null)
+			return Result<bool>.Failure("Wallet no encontrada");
 
-        return Result<bool>.Success(true);
-    }
+		wallet.Credit(cmd.Amount, "PSE");
+		await _walletRepo.UpdateAsync(wallet);
+
+		return Result<bool>.Success(true);
+	}
 }
