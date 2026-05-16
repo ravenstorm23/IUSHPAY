@@ -13,11 +13,17 @@ public class WalletRepository : IWalletRepository
 		_db = db;
 	}
 
+	// FIX: Include Transactions para que EF pueda trackear
+	// las nuevas transacciones que agrega Credit() y Debit()
 	public async Task<Wallet?> GetByUserIdAsync(Guid userId)
-		=> await _db.Wallets.FirstOrDefaultAsync(x => x.UserId == userId);
+		=> await _db.Wallets
+			.Include(w => w.Transactions)
+			.FirstOrDefaultAsync(x => x.UserId == userId);
 
 	public async Task<Wallet?> GetByIdAsync(Guid walletId)
-		=> await _db.Wallets.FirstOrDefaultAsync(x => x.Id == walletId);
+		=> await _db.Wallets
+			.Include(w => w.Transactions)
+			.FirstOrDefaultAsync(x => x.Id == walletId);
 
 	public async Task UpdateAsync(Wallet wallet)
 	{
