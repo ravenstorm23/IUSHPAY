@@ -32,14 +32,19 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
 	c.SwaggerDoc("v1", new OpenApiInfo { Title = "IUSHPAY API", Version = "v1" });
+
+	// FIX: Cambiar de ApiKey a Http con scheme bearer
+	// Antes Swagger no enviaba el token en el header Authorization correctamente
 	c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
 	{
-		Description = "JWT Authorization. Usa: Bearer {token}",
+		Description = "JWT Authorization. Ingresa solo el token, sin 'Bearer '",
 		Name = "Authorization",
 		In = ParameterLocation.Header,
-		Type = SecuritySchemeType.ApiKey,
-		Scheme = "Bearer"
+		Type = SecuritySchemeType.Http,
+		Scheme = "bearer",
+		BearerFormat = "JWT"
 	});
+
 	c.AddSecurityRequirement(new OpenApiSecurityRequirement
 	{
 		{
@@ -54,27 +59,17 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
-// =====================================================
-// ORDEN CORRECTO DE MIDDLEWARES
-// =====================================================
 app.UseResponseCompression();
 app.UseSwagger();
 app.UseSwaggerUI();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
-
-// FIX: Authentication y Authorization DEBEN ir antes
-// del WebhookMiddleware y de los controllers
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.UseMiddleware<WebhookSignatureMiddleware>();
 
 app.MapControllers();
 app.MapHealthChecks("/health");
 
-// =====================================================
-// MIGRACIONES CON REINTENTOS
-// =====================================================
 using (var scope = app.Services.CreateScope())
 {
 	var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
