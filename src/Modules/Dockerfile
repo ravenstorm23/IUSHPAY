@@ -46,7 +46,6 @@ USER appuser
 # Puerto por defecto de ASP.NET Core
 EXPOSE 8080
 
-# Variables de entorno base
 ENV ASPNETCORE_URLS=http://+:8080
 ENV ASPNETCORE_ENVIRONMENT=Production
 

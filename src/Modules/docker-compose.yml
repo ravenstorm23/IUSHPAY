@@ -1,0 +1,72 @@
+services:
+
+  # ================================
+  # API — IUSHPAY.WebAPI
+  # ================================
+  api:
+    build:
+      context: ./src/Modules
+      dockerfile: Dockerfile
+    container_name: iushpay_api
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+
+      # Base de datos (sobreescribe el appsettings.json vacío)
+      ConnectionStrings__DefaultConnection: ${DB_CONNECTION}
+
+      # Redis (apunta al servicio de abajo)
+      Redis__Connection: redis:6379
+
+      # PSE
+      PSE__ApiKey: ${PSE_API_KEY}
+      PSE__Secret: ${PSE_SECRET}
+
+      # JWT
+      Jwt__Key: ${JWT_KEY}
+      Jwt__Issuer: IUSHPAY
+      Jwt__Audience: IUSHPAY_Users
+      Jwt__ExpiresInMinutes: "60"
+
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - iushpay_net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+
+  # ================================
+  # Redis — Cache
+  # ================================
+  redis:
+    image: redis:7-alpine
+    container_name: iushpay_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"        # quitar en producción si no necesitas acceso externo
+    volumes:
+      - redis_data:/data
+    networks:
+      - iushpay_net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+
+networks:
+  iushpay_net:
+    driver: bridge
+
+
+volumes:
+  redis_data:
