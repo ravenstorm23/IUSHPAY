@@ -2,45 +2,69 @@ name: CI
 
 on:
   push:
-    branches: ["*"]
   pull_request:
-    branches: [main]
+    branches:
+      - main
 
 jobs:
   security:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Gitleaks
+
+      - name: Ensure full git history
+        run: git fetch --prune --unshallow || true
+
+      - name: Run Gitleaks
         uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build:
     runs-on: ubuntu-latest
+
     defaults:
       run:
         working-directory: src/Modules/IUSHPAY.WebAPI
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
+
       - name: Restore dependencies
         run: dotnet restore
+
       - name: Build
         run: dotnet build --no-restore
+
       - name: Test
         run: dotnet test --no-build --verbosity normal
 
   docker:
     runs-on: ubuntu-latest
+
     needs: build
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: Build Docker image
         run: |
           docker build \
