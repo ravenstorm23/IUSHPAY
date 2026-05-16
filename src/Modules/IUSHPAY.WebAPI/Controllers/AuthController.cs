@@ -29,7 +29,7 @@ public class AuthController : ControllerBase
         return result.IsSuccess ? Ok(result.Value) : Unauthorized(new { message = result.Error });
     }
 
-    /// <summary>Registrar nuevo usuario</summary>
+    /// <summary>Registrar nuevo usuario — devuelve JWT listo para usar</summary>
     [HttpPost("register")]
     [AllowAnonymous]
     public async Task<IActionResult> Register([FromBody] RegisterDto dto)
@@ -38,10 +38,9 @@ public class AuthController : ControllerBase
             dto.InstitutionalCode,
             dto.FullName,
             dto.Email,
-            dto.CarnetNumber,
             dto.Password));
 
-        return result.IsSuccess ? Ok(new { message = result.Value }) : BadRequest(new { message = result.Error });
+        return result.IsSuccess ? Ok(result.Value) : BadRequest(new { message = result.Error });
     }
 
     /// <summary>Perfil del usuario autenticado</summary>

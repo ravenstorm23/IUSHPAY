@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.ResponseCompression;
 
 using IUSHPAY.Infrastructure;
 using IUSHPAY.Infrastructure.Persistence;
@@ -57,6 +58,30 @@ builder.Services.AddControllers();
 
 
 // =====================================================
+// RESPONSE COMPRESSION (reduce tamaño payload ~70%)
+// =====================================================
+builder.Services.AddResponseCompression(options =>
+{
+	options.EnableForHttps = true;
+	options.Providers.Add<GzipCompressionProvider>();
+	options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(
+		["application/json"]);
+});
+
+builder.Services.Configure<GzipCompressionProviderOptions>(options =>
+{
+	options.Level = System.IO.Compression.CompressionLevel.Fastest;
+});
+
+
+// =====================================================
+// HEALTH CHECK (para keep-alive y monitoreo)
+// =====================================================
+builder.Services.AddHealthChecks()
+	.AddDbContextCheck<AppDbContext>("database");
+
+
+// =====================================================
 // SWAGGER
 // =====================================================
 builder.Services.AddEndpointsApiExplorer();
@@ -111,6 +136,8 @@ var app = builder.Build();
 // =====================================================
 // MIDDLEWARES
 // =====================================================
+app.UseResponseCompression(); // debe ir primero para comprimir todas las respuestas
+
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseMiddleware<WebhookSignatureMiddleware>();
@@ -139,6 +166,15 @@ app.MapControllers();
 
 
 // =====================================================
+// HEALTH CHECK ENDPOINT
+// Úsalo desde un cron externo (UptimeRobot, cron-job.org)
+// cada 10 min para evitar el cold start de Render
+// GET /health → 200 OK {"status":"Healthy"}
+// =====================================================
+app.MapHealthChecks("/health");
+
+
+// =====================================================
 // AUTO DATABASE MIGRATION + SEED
 // =====================================================
 using (var scope = app.Services.CreateScope())
@@ -147,15 +183,14 @@ using (var scope = app.Services.CreateScope())
 		.GetRequiredService<AppDbContext>();
 
 	// 1. Aplica migraciones pendientes
-	// db.Database.Migrate();
+	db.Database.Migrate();
 
 	// 2. Siembra los 3 admins de TI si aún no existen
-	// await DbSeeder.SeedAsync(db);
+	await DbSeeder.SeedAsync(db);
 }
 
 
 // =====================================================
 // RUN
 // =====================================================
-var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
-app.Run($"http://0.0.0.0:{port}");
+app.Run();

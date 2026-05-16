@@ -43,6 +43,15 @@ public static class DependencyInjection
 			{
 				npgsqlOptions.MigrationsAssembly(
 					typeof(AppDbContext).Assembly.FullName);
+
+				// Reintentar hasta 3 veces ante fallos transitorios (cold start de Supabase/Render)
+				npgsqlOptions.EnableRetryOnFailure(
+					maxRetryCount: 3,
+					maxRetryDelay: TimeSpan.FromSeconds(5),
+					errorCodesToAdd: null);
+
+				// Timeout de comando explícito
+				npgsqlOptions.CommandTimeout(15);
 			}
 		)
 		);

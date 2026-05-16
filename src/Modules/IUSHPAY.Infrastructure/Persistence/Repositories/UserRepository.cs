@@ -18,10 +18,6 @@ public class UserRepository : IUserRepository
         => await _db.Users.Include(x => x.Wallet)
                           .FirstOrDefaultAsync(x => x.Id == id);
 
-    public async Task<User?> GetByCarnetAsync(string carnet)
-        => await _db.Users.Include(x => x.Wallet)
-                          .FirstOrDefaultAsync(x => x.CarnetNumber == carnet);
-
     public async Task<User?> GetByEmailAsync(string email)
         => await _db.Users.Include(x => x.Wallet)
                           .FirstOrDefaultAsync(x => x.Email == email);

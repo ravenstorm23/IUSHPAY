@@ -10,8 +10,6 @@ public class User
 
 	public string Email { get; private set; } = string.Empty;
 
-	public string CarnetNumber { get; private set; } = string.Empty;
-
 	public string PasswordHash { get; private set; } = string.Empty;
 
 	public string Role { get; private set; } = "User";
@@ -25,7 +23,7 @@ public class User
 
 	private User() { }
 
-	public static User Create(string code, string name, string email, string carnet, string passwordHash)
+	public static User Create(string code, string name, string email, string passwordHash)
 	{
 		var id = Guid.NewGuid();
 		return new User
@@ -34,7 +32,6 @@ public class User
 			InstitutionalCode = code,
 			FullName = name,
 			Email = email,
-			CarnetNumber = carnet,
 			PasswordHash = passwordHash,
 			Role = "User",
 			Wallet = Wallet.CreateFor(id),
@@ -46,7 +43,7 @@ public class User
 	/// Crea un usuario administrador (Área TI).
 	/// </summary>
 	/// <param name="email">Correo institucional del admin.</param>
-	/// <param name="passwordHash">Hash de la contraseña.</param>
+	/// <param name="passwordHash">Hash BCrypt de la contraseña.</param>
 	/// <param name="fullName">Nombre completo; por defecto "Administrador TI".</param>
 	public static User CreateAdmin(string email, string passwordHash, string fullName = "Administrador TI")
 	{
@@ -56,7 +53,6 @@ public class User
 			InstitutionalCode = "ADMIN",
 			FullName = fullName,
 			Email = email,
-			CarnetNumber = "ADMIN",
 			PasswordHash = passwordHash,
 			Role = "Admin",
 			Wallet = Wallet.CreateFor(Guid.NewGuid()),

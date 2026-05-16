@@ -22,8 +22,6 @@ obj/
 # =====================
 # Configuración local sensible
 # =====================
-appsettings.json                 
-appsettings.Production.json       
 appsettings.Development.json
 appsettings.Local.json
 *.local.json

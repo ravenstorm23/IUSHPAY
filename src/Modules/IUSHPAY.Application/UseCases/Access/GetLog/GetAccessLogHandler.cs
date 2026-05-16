@@ -21,7 +21,6 @@ public class GetAccessLogHandler
 			AccessId: r.Id,
 			UserId: r.UserId,
 			UserFullName: r.User?.FullName ?? "–",
-			UserCarnet: r.User?.CarnetNumber ?? "–",
 			Method: r.Method,
 			IsAuthorized: r.IsAuthorized,
 			AccessedAt: r.AccessedAt
